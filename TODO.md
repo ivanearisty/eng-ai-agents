@@ -1,0 +1,2 @@
+- [x] Add zsh support and custom zshrc on build
+- [x] fix workspace folder mess '${workspaceFolder}'/.vbash: unexpected EOF while looking for matching `''

@@ -14,6 +14,7 @@ services:
       - "${DEV_PORT:-8000}:8000"
     volumes:
       - .:${WORKSPACE_DIR:-/workspaces/eng-ai-agents}
+      - ${HOME}/.zshrc:/home/${WORKSPACE_USER:-vscode}/.zshrc:ro
     working_dir: ${WORKSPACE_DIR:-/workspaces/eng-ai-agents}
     environment:
       - PATH=${WORKSPACE_DIR:-/workspaces/eng-ai-agents}/.venv/bin:$PATH
@@ -24,7 +25,7 @@ services:
     env_file:
       - path: .env
         required: true
-    command:  bash -c "tail -f /dev/null"
+    command: ["zsh", "-lc", "tail -f /dev/null"]
     stdin_open: true
     tty: true
     networks:

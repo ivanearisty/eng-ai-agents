@@ -184,3 +184,5 @@ datasets/*
 install/
 log/
 .colcon/
+
+lazygit*

@@ -56,9 +56,10 @@ RUN apt-get clean && \
         libpq-dev libsm6 libswscale-dev libtbb-dev libtesseract-dev \
         libtiff-dev libtiff5-dev libv4l-dev libx11-dev libxext6 libxine2-dev \
         libxrender-dev libxvidcore-dev libx264-dev libgtkglext1 libgtkglext1-dev \
-        libvtk9-dev libdc1394-dev libgstreamer-plugins-base1.0-dev \
+    libvtk9-dev libdc1394-dev libgstreamer-plugins-base1.0-dev \
         libgstreamer1.0-dev libopenexr-dev \
         openexr \
+    zsh \
         pkg-config \
         qv4l2 \
         v4l-utils \
@@ -102,4 +103,35 @@ RUN curl -sS https://downloads.1password.com/linux/keys/1password.asc | gpg --de
 # Create workspace directory
 WORKDIR ${WORKSPACE_DIR}
 
+# Ensure zsh is available and set it as the default shell for the workspace user
+RUN if [ -x "$(command -v zsh)" ]; then \
+            if command -v usermod >/dev/null 2>&1; then \
+                usermod -s $(command -v zsh) ${WORKSPACE_USER}; \
+            else \
+                sed -i "s|/bin/bash|$(command -v zsh)|g" /etc/passwd || true; \
+            fi; \
+        fi && \
+        echo "SHELL=$(command -v zsh)" >> /etc/environment || true
+
+ENV SHELL=/usr/bin/zsh
+
 USER vscode
+ 
+# Install Oh My Zsh and common plugins/themes for the workspace user
+RUN set -eux; \
+        USER_HOME="/home/${WORKSPACE_USER}"; \
+        ZSH_DIR="$USER_HOME/.oh-my-zsh"; \
+        ZSH_CUSTOM="$ZSH_DIR/custom"; \
+        if [ ! -d "$ZSH_DIR" ]; then \
+            git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git "$ZSH_DIR"; \
+        fi; \
+        if [ ! -d "$ZSH_CUSTOM/themes/powerlevel10k" ]; then \
+            git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$ZSH_CUSTOM/themes/powerlevel10k"; \
+        fi; \
+        if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then \
+            git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions.git "$ZSH_CUSTOM/plugins/zsh-autosuggestions"; \
+        fi; \
+        if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then \
+            git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"; \
+        fi; \
+        chown -R ${WORKSPACE_USER}:${WORKSPACE_USER} "$USER_HOME/.oh-my-zsh" || true
