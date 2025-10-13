@@ -173,7 +173,6 @@ datafiles/
 
 runs/
 
-*.pth
 .ipynb_checkpoints
 
 *.tar.xz
@@ -186,3 +185,5 @@ log/
 .colcon/
 
 lazygit*
+
+.DS_Store
